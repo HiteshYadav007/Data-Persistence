@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
+
 public class MainManager : MonoBehaviour
 {
     public Brick BrickPrefab;
@@ -11,6 +12,7 @@ public class MainManager : MonoBehaviour
     public Rigidbody Ball;
 
     public Text ScoreText;
+    [SerializeField] private Text highScoreText;
     public GameObject GameOverText;
     
     private bool m_Started = false;
@@ -18,7 +20,19 @@ public class MainManager : MonoBehaviour
     
     private bool m_GameOver = false;
 
+
+    private string datapath;
+    public string playerName;
+    public string highScorePlayerName;
+    public int highScore;
+
+
+    public static MainManager Instance;
+
     
+
+    
+
     // Start is called before the first frame update
     void Start()
     {
@@ -71,23 +85,34 @@ public class MainManager : MonoBehaviour
     public void GameOver()
     {
         m_GameOver = true;
+        UpdateSessionHighScore();
+        UpdateHighScoreText();
         GameOverText.SetActive(true);
     }
 
-    public static MainManager Instance;
-
-    private void Awake()
+    private void UpdateSessionHighScore()
     {
-        // start of new code
-        if (Instance != null)
+        if (PlayerSession.Instance != null)
         {
-            Destroy(gameObject);
-            return;
+            if (m_Points > PlayerSession.Instance.highScore)
+            {
+                PlayerSession.Instance.highScore = m_Points;
+                PlayerSession.Instance.highScorePlayerName = PlayerSession.Instance.playerName;
+                PlayerSession.Instance.SaveHighScoreToFile();
+            }
         }
-        // end of new code
-
-        Instance = this;
-        DontDestroyOnLoad(gameObject);
     }
+
+    private void UpdateHighScoreText()
+    {
+        if (PlayerSession.Instance != null)
+        {
+            highScoreText.text = $"Best score: {PlayerSession.Instance.highScorePlayerName} : {PlayerSession.Instance.highScore}";
+        }
+    }
+
+
+
+
 
 }
